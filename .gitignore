@@ -6,7 +6,7 @@ __pycache__/
 .env
 
 # Dataset / large files
-../khana/
+khana/
 ../dataset.tar.gz
 ../splits/
 

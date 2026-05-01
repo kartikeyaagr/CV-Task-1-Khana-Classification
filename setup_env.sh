@@ -4,7 +4,7 @@
 
 set -e
 
-ENV_NAME="khana"
+ENV_NAME="kartikeya-khana-venv"
 PYTHON_VERSION="3.11"
 
 # Initialise conda for this shell session

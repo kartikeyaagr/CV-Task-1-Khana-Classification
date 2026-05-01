@@ -7,8 +7,8 @@ Run once before training:
 from data import build_manifest
 
 build_manifest(
-    dataset_root="../khana",
-    output_path="../splits/manifest.json",
+    dataset_root="khana",
+    output_path="splits/manifest.json",
     val_ratio=0.10,
     test_ratio=0.10,
     seed=42,
