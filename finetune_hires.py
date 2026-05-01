@@ -88,7 +88,7 @@ def main():
             val   = evaluate(model,      val_loader, criterion, device, amp_dtype)
             v_ema = evaluate(ema.module, val_loader, criterion, device, amp_dtype)
 
-            lr = optimizer.param_groups[0]["lr"]
+            lr = max(g["lr"] for g in optimizer.param_groups)
             m  = {"train_loss": train_loss, "val_top1": val["top1"],
                   "ema_top1": v_ema["top1"], "ema_top5": v_ema["top5"], "lr": lr}
             tracker.log(m, epoch); log.metrics(m, epoch)
