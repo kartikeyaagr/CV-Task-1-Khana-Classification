@@ -2,8 +2,8 @@
 # Run: uv run python scripts/train.py --config configs/debug.yaml
 
 data:
-  root: "../khana"
-  manifest: "../splits/manifest.json"
+  root: "khana"
+  manifest: "splits/manifest.json"
   num_classes: 80
   image_size: 224
   num_workers: 4

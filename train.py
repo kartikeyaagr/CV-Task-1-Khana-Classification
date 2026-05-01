@@ -31,8 +31,8 @@ from utils    import set_seed, Logger, save_checkpoint
 def parse_args():
     p = argparse.ArgumentParser()
     p.add_argument("--debug",       action="store_true", help="Quick 2-epoch smoke test")
-    p.add_argument("--manifest",    default="../splits/manifest.json")
-    p.add_argument("--data-root",   default="../khana")
+    p.add_argument("--manifest",    default="splits/manifest.json")
+    p.add_argument("--data-root",   default="khana")
     p.add_argument("--model",       default="convnext_small.fb_in22k_ft_in1k")
     p.add_argument("--epochs",      type=int,   default=25)
     p.add_argument("--batch-size",  type=int,   default=64)

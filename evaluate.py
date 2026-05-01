@@ -23,8 +23,8 @@ from utils   import Logger, load_checkpoint
 def parse_args():
     p = argparse.ArgumentParser()
     p.add_argument("--checkpoint",  required=True)
-    p.add_argument("--manifest",    default="../splits/manifest.json")
-    p.add_argument("--data-root",   default="../khana")
+    p.add_argument("--manifest",    default="splits/manifest.json")
+    p.add_argument("--data-root",   default="khana")
     p.add_argument("--model",       default="convnext_small.fb_in22k_ft_in1k")
     p.add_argument("--split",       default="test", choices=["val", "test"])
     p.add_argument("--image-size",  type=int, default=320)

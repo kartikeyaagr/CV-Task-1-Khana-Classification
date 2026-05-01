@@ -27,8 +27,8 @@ IMAGENET_STD  = (0.229, 0.224, 0.225)
 
 def parse_args():
     p = argparse.ArgumentParser()
-    p.add_argument("--manifest",     default="../splits/manifest.json")
-    p.add_argument("--data-root",    default="../khana")
+    p.add_argument("--manifest",     default="splits/manifest.json")
+    p.add_argument("--data-root",    default="khana")
     p.add_argument("--n-per-class",  type=int, default=10)
     p.add_argument("--timesteps",    type=int, default=10)
     p.add_argument("--noise-reps",   type=int, default=2)

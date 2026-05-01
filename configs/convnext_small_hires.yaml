@@ -2,8 +2,8 @@
 # Run: uv run python scripts/finetune_hires.py --config configs/convnext_small_hires.yaml --checkpoint checkpoints/best_ema.pt
 
 data:
-  root: "../khana"
-  manifest: "../splits/manifest.json"
+  root: "khana"
+  manifest: "splits/manifest.json"
   num_classes: 80
   image_size: 320
   num_workers: 8
