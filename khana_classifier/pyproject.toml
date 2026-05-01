@@ -1,7 +1,6 @@
 [project]
 name = "khana-classifier"
 version = "0.1.0"
-description = "80-class Indian food image classifier for the khana dataset"
 requires-python = ">=3.11"
 dependencies = [
     "torch>=2.3.0",
@@ -18,16 +17,3 @@ dependencies = [
     "numpy>=1.26.0",
     "pillow>=10.4.0",
 ]
-
-[project.optional-dependencies]
-dev = ["ipykernel", "ipywidgets"]
-
-[build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
-
-[tool.hatch.build.targets.wheel]
-packages = ["src/khana"]
-
-[tool.uv]
-dev-dependencies = ["ipykernel", "ipywidgets"]
