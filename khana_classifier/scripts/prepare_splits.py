@@ -11,7 +11,7 @@ import sys
 from pathlib import Path
 
 # Allow running as a top-level script
-sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 
 from khana.data.splits import build_manifest
 
