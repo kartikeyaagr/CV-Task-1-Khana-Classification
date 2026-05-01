@@ -1,0 +1,47 @@
+# Phase-2 fine-tuning: 320px, 8 epochs, no MixUp, lower LR
+# Run: uv run python scripts/finetune_hires.py --config configs/convnext_small_hires.yaml --checkpoint checkpoints/best_ema.pt
+
+data:
+  root: "../khana"
+  manifest: "../splits/manifest.json"
+  num_classes: 80
+  image_size: 320
+  num_workers: 8
+  pin_memory: true
+  prefetch_factor: 4
+  sampler_power: 0.5
+
+aug:
+  scale_min: 0.75
+  trivial_augment: true
+  random_erase_prob: 0.05
+  mixup_alpha: 0.0    # disabled in phase 2 — sharpening on real labels
+  cutmix_alpha: 0.0
+  mixup_prob: 0.0
+
+model:
+  name: "convnext_small.fb_in22k_ft_in1k"
+  drop_path_rate: 0.05
+  layer_decay: 0.75
+
+train:
+  epochs: 8
+  batch_size: 24
+  grad_accum_steps: 3    # effective batch = 72
+  optimizer: "adamw"
+  lr: 0.0001
+  weight_decay: 0.05
+  clip_grad_norm: 1.0
+  warmup_epochs: 1
+  min_lr: 0.0000001
+  label_smoothing: 0.1
+  amp_dtype: "bfloat16"
+  ema_decay: 0.9998
+  checkpoint_dir: "checkpoints"
+  save_every: 2
+  seed: 42
+
+mlflow:
+  experiment_name: "khana-convnext_small-hires"
+  tracking_uri: "mlruns"
+  log_system_metrics: true

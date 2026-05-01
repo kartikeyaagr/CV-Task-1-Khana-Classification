@@ -1,0 +1,25 @@
+# Dataset — never commit (6.7 GB)
+khana/
+dataset.tar.gz
+
+# Generated splits manifest (absolute paths, machine-specific)
+# Re-generate with: uv run python scripts/prepare_splits.py
+splits/
+
+# macOS
+.DS_Store
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+
+# Training outputs
+checkpoints/
+checkpoints_debug/
+mlruns/
+diffusion_results/
+
+# Private planning docs (per project rules)
+tasks/
+docs/

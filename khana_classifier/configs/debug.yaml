@@ -1,0 +1,48 @@
+# Debug config: 1 k-image subset, 2 epochs — completes in < 2 min
+# Run: uv run python scripts/train.py --config configs/debug.yaml
+
+data:
+  root: "../khana"
+  manifest: "../splits/manifest.json"
+  num_classes: 80
+  image_size: 224
+  num_workers: 4
+  pin_memory: true
+  prefetch_factor: 2
+  sampler_power: 0.5
+  max_samples_per_class: 13    # 13/class * 80 = 1040 total
+
+aug:
+  scale_min: 0.7
+  trivial_augment: true
+  random_erase_prob: 0.1
+  mixup_alpha: 0.2
+  cutmix_alpha: 1.0
+  mixup_prob: 0.5
+
+model:
+  name: "convnext_small.fb_in22k_ft_in1k"
+  drop_path_rate: 0.1
+  layer_decay: 0.75
+
+train:
+  epochs: 2
+  batch_size: 32
+  grad_accum_steps: 1
+  optimizer: "adamw"
+  lr: 0.0005
+  weight_decay: 0.05
+  clip_grad_norm: 1.0
+  warmup_epochs: 1
+  min_lr: 0.000001
+  label_smoothing: 0.1
+  amp_dtype: "bfloat16"
+  ema_decay: 0.9998
+  checkpoint_dir: "checkpoints_debug"
+  save_every: 1
+  seed: 42
+
+mlflow:
+  experiment_name: "khana-convnext_small-debug"
+  tracking_uri: "mlruns"
+  log_system_metrics: false
