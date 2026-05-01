@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import os
 import random
 from collections import Counter, defaultdict
 from pathlib import Path
@@ -139,12 +140,13 @@ def build_manifest(dataset_root: str, output_path: str,
     per_class_counts = defaultdict(int)
     for class_dir in class_dirs:
         idx = class_to_idx[class_dir.name]
-        for f in class_dir.iterdir():
-            if f.name.startswith(".") or not f.is_file():
-                continue
-            all_paths.append(str(f.relative_to(root)))
-            all_labels.append(idx)
-            per_class_counts[idx] += 1
+        with os.scandir(class_dir) as it:
+            for entry in it:
+                if entry.name.startswith(".") or not entry.is_file(follow_symlinks=False):
+                    continue
+                all_paths.append(str(Path(entry.path).relative_to(root)))
+                all_labels.append(idx)
+                per_class_counts[idx] += 1
 
     paths_np  = np.array(all_paths)
     labels_np = np.array(all_labels)
