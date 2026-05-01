@@ -77,8 +77,7 @@ def main():
                             transform=train_transforms(args.image_size),
                             max_per_class=max_per_class)
     val_ds   = KhanaDataset(args.manifest, "val",   args.data_root,
-                            transform=val_transforms(args.image_size),
-                            max_per_class=max_per_class)
+                            transform=val_transforms(args.image_size))
     log.info(f"Train: {len(train_ds):,}  Val: {len(val_ds):,}  Classes: {num_classes}")
 
     train_loader = DataLoader(train_ds, batch_size=args.batch_size,

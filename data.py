@@ -10,6 +10,8 @@ from pathlib import Path
 from typing import Callable, Optional
 
 import numpy as np
+from PIL import ImageFile
+ImageFile.LOAD_TRUNCATED_IMAGES = True
 import torch
 from PIL import Image
 from sklearn.model_selection import StratifiedShuffleSplit

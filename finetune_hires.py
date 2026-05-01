@@ -36,6 +36,7 @@ def parse_args():
     p.add_argument("--amp",         default="bfloat16", choices=["bfloat16", "float16", "none"])
     p.add_argument("--out-dir",     default="checkpoints")
     p.add_argument("--seed",        type=int,   default=42)
+    p.add_argument("--num-workers", type=int,   default=2)
     return p.parse_args()
 
 
@@ -55,10 +56,12 @@ def main():
     train_loader = DataLoader(train_ds, batch_size=args.batch_size,
                               sampler=weighted_sampler(train_ds.targets),
                               collate_fn=plain_collate,
-                              num_workers=4, pin_memory=True, persistent_workers=True, drop_last=True)
+                              num_workers=args.num_workers, pin_memory=True,
+                              persistent_workers=args.num_workers > 0, drop_last=True)
     val_loader   = DataLoader(val_ds, batch_size=args.batch_size,
                               collate_fn=plain_collate, shuffle=False,
-                              num_workers=4, pin_memory=True, persistent_workers=True)
+                              num_workers=args.num_workers, pin_memory=True,
+                              persistent_workers=args.num_workers > 0)
 
     model = build_model(args.model, num_classes=num_classes, pretrained=False).to(device)
     ema   = ModelEmaV3(model, decay=0.9998)
