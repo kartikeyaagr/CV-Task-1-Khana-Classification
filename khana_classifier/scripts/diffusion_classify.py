@@ -17,8 +17,7 @@ import sys
 import time
 from collections import defaultdict
 from pathlib import Path
-
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
+import _bootstrap  # noqa: F401 — adds src/ to sys.path
 
 import torch
 import numpy as np

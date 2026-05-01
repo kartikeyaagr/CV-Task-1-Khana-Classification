@@ -9,9 +9,7 @@ Usage:
 import argparse
 import sys
 from pathlib import Path
-
-# Allow running as a top-level script
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
+import _bootstrap  # noqa: F401 — adds src/ to sys.path
 
 from khana.data.splits import build_manifest
 
