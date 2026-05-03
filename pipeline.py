@@ -1,10 +1,23 @@
-"""Full training pipeline: Phase-1 → Phase-2 → Evaluate.
+"""Full training pipeline: Phase-1 → progressive hires finetune stages → Evaluate.
 
-Run:
+Examples:
+    # Default: 224 → 320 → evaluate
     python pipeline.py
-    python pipeline.py --epochs 50 --finetune-epochs 15
-    python pipeline.py --resume models/epoch_020.pt --epochs 50
-    python pipeline.py --model convnext_base.fb_in22k_ft_in1k --batch-size 32
+
+    # Progressive: 224 → 320 → 384 → evaluate
+    python pipeline.py --finetune-sizes 320 384
+
+    # Three stages: 224 → 320 → 384 → 448 → evaluate
+    python pipeline.py --finetune-sizes 320 384 448
+
+    # Resume phase-1 from checkpoint, then run all finetune stages
+    python pipeline.py --resume models/epoch_020.pt --epochs 50 --finetune-sizes 320 384
+
+    # Skip phase-1 (already done), run finetune stages from existing best_ema.pt
+    python pipeline.py --skip-train --finetune-sizes 320 384
+
+    # Skip straight to a specific stage using an existing checkpoint
+    python pipeline.py --skip-train --skip-sizes 320 --finetune-sizes 320 384
 """
 
 import argparse
@@ -23,37 +36,59 @@ def run(cmd: list[str], label: str) -> None:
         sys.exit(result.returncode)
 
 
+def auto_batch(base_batch: int, base_size: int, target_size: int) -> int:
+    """Scale batch size inversely with image area, clamped to a minimum of 8."""
+    scaled = int(base_batch * (base_size / target_size) ** 2)
+    return max(8, scaled)
+
+
 def parse_args():
     p = argparse.ArgumentParser(description="Full Khana training pipeline")
-    # Phase-1 args
-    p.add_argument("--resume",           default=None)
-    p.add_argument("--manifest",         default="splits/manifest.json")
-    p.add_argument("--data-root",        default="khana")
-    p.add_argument("--model",            default="convnext_small.fb_in22k_ft_in1k")
-    p.add_argument("--epochs",           type=int,   default=25)
-    p.add_argument("--batch-size",       type=int,   default=64)
-    p.add_argument("--lr",               type=float, default=5e-4)
-    p.add_argument("--out-dir",          default="models")
-    # Phase-2 args
-    p.add_argument("--finetune-epochs",  type=int,   default=8)
-    p.add_argument("--finetune-batch",   type=int,   default=24)
-    p.add_argument("--finetune-lr",      type=float, default=1e-4)
-    p.add_argument("--finetune-size",    type=int,   default=320)
-    p.add_argument("--num-workers",      type=int,   default=2)
-    # Evaluate args
-    p.add_argument("--tta",              action="store_true")
-    p.add_argument("--eval-split",       default="test", choices=["val", "test"])
+
+    # Phase-1
+    p.add_argument("--resume",          default=None,   help="Checkpoint to resume phase-1 from")
+    p.add_argument("--manifest",        default="splits/manifest.json")
+    p.add_argument("--data-root",       default="khana")
+    p.add_argument("--model",           default="convnext_small.fb_in22k_ft_in1k")
+    p.add_argument("--epochs",          type=int,   default=25)
+    p.add_argument("--batch-size",      type=int,   default=64)
+    p.add_argument("--lr",              type=float, default=5e-4)
+    p.add_argument("--out-dir",         default="models")
+
+    # Finetune stages
+    p.add_argument("--finetune-sizes",  type=int, nargs="+", default=[320],
+                   metavar="SIZE",
+                   help="Progressive finetune resolutions in order (e.g. 320 384 448)")
+    p.add_argument("--finetune-epochs", type=int,   default=8,
+                   help="Epochs per finetune stage")
+    p.add_argument("--finetune-lr",     type=float, default=1e-4,
+                   help="Starting LR for each finetune stage (halved per stage)")
+    p.add_argument("--finetune-batch",  type=int,   default=24,
+                   help="Batch size for first finetune stage; auto-scaled for larger sizes")
+    p.add_argument("--num-workers",     type=int,   default=2)
+
+    # Evaluate
+    p.add_argument("--tta",             action="store_true")
+    p.add_argument("--eval-split",      default="test", choices=["val", "test"])
+
     # Skip flags
-    p.add_argument("--skip-train",       action="store_true", help="Skip phase-1, use existing best_ema.pt")
-    p.add_argument("--skip-finetune",    action="store_true", help="Skip phase-2, evaluate best_ema.pt directly")
+    p.add_argument("--skip-train",      action="store_true",
+                   help="Skip phase-1; start from existing best_ema.pt")
+    p.add_argument("--skip-sizes",      type=int, nargs="+", default=[],
+                   metavar="SIZE",
+                   help="Skip finetune stages at these sizes (already completed)")
+
     return p.parse_args()
+
+
+def stage_dir(out_dir: str, size: int) -> str:
+    return str(Path(out_dir) / str(size))
 
 
 def main():
     args    = parse_args()
     out_dir = args.out_dir
     best_p1 = str(Path(out_dir) / "best_ema.pt")
-    best_p2 = str(Path(out_dir) / "best_ema_hires.pt")
 
     # ── Phase 1 ───────────────────────────────────────────────────────────────
     if not args.skip_train:
@@ -73,40 +108,53 @@ def main():
     else:
         print(f"[pipeline] Skipping phase-1, using {best_p1}")
 
-    # ── Phase 2 ───────────────────────────────────────────────────────────────
-    if not args.skip_finetune:
-        cmd = [
-            "finetune_hires.py",
-            "--checkpoint", best_p1,
-            "--manifest",   args.manifest,
-            "--data-root",  args.data_root,
-            "--model",      args.model,
-            "--epochs",     str(args.finetune_epochs),
-            "--batch-size", str(args.finetune_batch),
-            "--lr",         str(args.finetune_lr),
-            "--image-size", str(args.finetune_size),
-            "--out-dir",    out_dir,
-            "--num-workers", str(args.num_workers),
-        ]
-        run(cmd, f"Phase 2 — hires finetune @ {args.finetune_size}px for {args.finetune_epochs} epochs")
-        eval_ckpt = best_p2
-    else:
-        print(f"[pipeline] Skipping phase-2, evaluating {best_p1}")
-        eval_ckpt = best_p1
+    # ── Progressive finetune stages ───────────────────────────────────────────
+    prev_ckpt = best_p1
+    prev_size = 224
+    lr        = args.finetune_lr
 
-    # ── Evaluate ──────────────────────────────────────────────────────────────
+    for size in args.finetune_sizes:
+        out   = stage_dir(out_dir, size)
+        ckpt  = str(Path(out) / "best_ema_hires.pt")
+        batch = auto_batch(args.finetune_batch, args.finetune_sizes[0], size)
+
+        if size in args.skip_sizes:
+            print(f"[pipeline] Skipping {size}px stage, using {ckpt}")
+        else:
+            cmd = [
+                "finetune_hires.py",
+                "--checkpoint", prev_ckpt,
+                "--manifest",   args.manifest,
+                "--data-root",  args.data_root,
+                "--model",      args.model,
+                "--epochs",     str(args.finetune_epochs),
+                "--batch-size", str(batch),
+                "--lr",         str(lr),
+                "--image-size", str(size),
+                "--out-dir",    out,
+                "--num-workers", str(args.num_workers),
+            ]
+            run(cmd, f"Finetune stage {prev_size}px → {size}px  "
+                     f"(batch {batch}, lr {lr:.0e}, {args.finetune_epochs} epochs)")
+
+        prev_ckpt = ckpt
+        prev_size = size
+        lr        = lr / 2   # halve LR each stage
+
+    # ── Evaluate final checkpoint ─────────────────────────────────────────────
+    final_size = args.finetune_sizes[-1]
     cmd = [
         "evaluate.py",
-        "--checkpoint", eval_ckpt,
+        "--checkpoint", prev_ckpt,
         "--manifest",   args.manifest,
         "--data-root",  args.data_root,
         "--model",      args.model,
         "--split",      args.eval_split,
-        "--image-size", str(args.finetune_size),
+        "--image-size", str(final_size),
     ]
     if args.tta:
         cmd.append("--tta")
-    run(cmd, f"Evaluate on {args.eval_split} split{' + TTA' if args.tta else ''}")
+    run(cmd, f"Evaluate @ {final_size}px on {args.eval_split}{' + TTA' if args.tta else ''}")
 
     print(f"\n[pipeline] All done. Results in {out_dir}/")
 
