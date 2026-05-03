@@ -2,8 +2,8 @@
 
 Run:
     python train.py
-    python train.py --debug          # quick 2-epoch smoke test
-    python train.py --epochs 30 --lr 0.0003
+    python train.py --debug
+    python train.py --resume models/epoch_020.pt --epochs 50
 """
 
 import argparse
@@ -24,13 +24,15 @@ from data     import KhanaDataset, train_transforms, val_transforms, mixup_colla
 from model    import build_model, freeze_stem, unfreeze_all, count_params
 from engine   import train_one_epoch, evaluate
 from metrics  import per_class_accuracy, save_confusion_matrix
+from plots    import save_training_curves
 from tracker  import Tracker
-from utils    import set_seed, Logger, save_checkpoint
+from utils    import set_seed, Logger, save_checkpoint, load_checkpoint
 
 
 def parse_args():
     p = argparse.ArgumentParser()
     p.add_argument("--debug",       action="store_true", help="Quick 2-epoch smoke test")
+    p.add_argument("--resume",      default=None,        help="Checkpoint to resume training from")
     p.add_argument("--manifest",    default="splits/manifest.json")
     p.add_argument("--data-root",   default="khana")
     p.add_argument("--model",       default="convnext_small.fb_in22k_ft_in1k")
@@ -40,7 +42,7 @@ def parse_args():
     p.add_argument("--wd",          type=float, default=0.05)
     p.add_argument("--image-size",  type=int,   default=224)
     p.add_argument("--amp",         default="bfloat16", choices=["bfloat16", "float16", "none"])
-    p.add_argument("--out-dir",     default="checkpoints")
+    p.add_argument("--out-dir",     default="models")
     p.add_argument("--seed",        type=int,   default=42)
     return p.parse_args()
 
@@ -107,21 +109,36 @@ def main():
                                   lr_min=1e-6, warmup_t=5 * len(train_loader),
                                   warmup_lr_init=1e-6, warmup_prefix=True, t_in_epochs=False)
 
+    # ── Resume ────────────────────────────────────────────────────────────────
+    history     = []
+    start_epoch = 1
+    if args.resume:
+        ckpt        = load_checkpoint(args.resume, model, ema=ema,
+                                      optimizer=optimizer, scheduler=scheduler, device=device)
+        start_epoch = ckpt["epoch"] + 1
+        history     = ckpt.get("history", [])
+        if start_epoch > 6:
+            unfreeze_all(model)
+        log.info(f"Resumed from {args.resume}  (epoch {ckpt['epoch']} → continuing to {args.epochs})")
+
     # ── Setup ─────────────────────────────────────────────────────────────────
     out = Path(args.out_dir); out.mkdir(parents=True, exist_ok=True)
-    aug_preview(train_loader, out / "aug_preview.png")
-    log.info(f"Aug preview → {out/'aug_preview.png'}")
+    if not args.resume:
+        aug_preview(train_loader, out / "aug_preview.png")
+        log.info(f"Aug preview → {out/'aug_preview.png'}")
 
     tracker  = Tracker("khana-phase1", system_metrics=not args.debug)
-    best, best_path = 0.0, out / "best_ema.pt"
+    best     = max((h["ema_top1"] for h in history), default=0.0)
+    best_path = out / "best_ema.pt"
 
-    freeze_stem(model)
+    if not args.resume:
+        freeze_stem(model)
 
-    with tracker.run(name="debug" if args.debug else None,
-                     params=vars(args)):
+    with tracker.run(name="debug" if args.debug else None, params=vars(args)):
 
-        for epoch in range(1, args.epochs + 1):
-            if epoch == 6: unfreeze_all(model)   # unfreeze stem after warmup
+        for epoch in range(start_epoch, args.epochs + 1):
+            if epoch == 6 and not args.resume:
+                unfreeze_all(model)
 
             train_loss = train_one_epoch(
                 model, train_loader, criterion, optimizer, scheduler,
@@ -132,23 +149,31 @@ def main():
             v_ema = evaluate(ema.module,  val_loader, criterion, device, amp_dtype)
 
             lr = max(g["lr"] for g in optimizer.param_groups)
-            m  = {"train_loss": train_loss, "val_top1": val["top1"], "val_top5": val["top5"],
+            m  = {"train_loss": train_loss, "val_loss": val["loss"],
+                  "val_top1": val["top1"],  "val_top5": val["top5"],
                   "ema_top1": v_ema["top1"], "ema_top5": v_ema["top5"], "lr": lr}
             tracker.log(m, epoch)
             log.metrics(m, epoch)
 
+            history.append({"epoch": epoch, **m})
+
             if epoch % 5 == 0:
                 save_checkpoint(out / f"epoch_{epoch:03d}.pt", epoch, model, ema,
-                                optimizer, scheduler, m, vars(args))
+                                optimizer, scheduler, m, vars(args), history)
 
             if v_ema["top1"] > best:
                 best = v_ema["top1"]
-                save_checkpoint(best_path, epoch, model, ema, optimizer, scheduler, m, vars(args))
+                save_checkpoint(best_path, epoch, model, ema, optimizer, scheduler,
+                                m, vars(args), history)
                 log.ok(f"New best EMA top-1: {best:.2f}%")
 
         log.ok(f"Done. Best EMA top-1: {best:.2f}%  →  {best_path}")
 
-        # Confusion matrix
+        # ── Diagnostic plots ──────────────────────────────────────────────────
+        save_training_curves(history, out, prefix="phase1")
+        log.info(f"Training curves → {out}/phase1_training_curves.png")
+
+        # ── Confusion matrix ──────────────────────────────────────────────────
         all_p, all_t = [], []
         with torch.inference_mode():
             amp_ctx = torch.amp.autocast(device_type=device.type, dtype=amp_dtype) if amp_dtype else nullcontext()

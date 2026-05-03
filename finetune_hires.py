@@ -1,7 +1,7 @@
 """Phase-2 high-resolution fine-tuning @ 320px.
 
 Run after phase-1:
-    python finetune_hires.py --checkpoint checkpoints/best_ema.pt
+    python finetune_hires.py --checkpoint models/best_ema.pt
 """
 
 import argparse
@@ -14,9 +14,10 @@ from timm.utils import ModelEmaV3
 from timm.scheduler import CosineLRScheduler
 from torch.utils.data import DataLoader
 
-from data    import KhanaDataset, train_transforms, val_transforms, mixup_collate, plain_collate, weighted_sampler
+from data    import KhanaDataset, train_transforms, val_transforms, plain_collate, weighted_sampler
 from model   import build_model
 from engine  import train_one_epoch, evaluate
+from plots   import save_training_curves
 from tracker import Tracker
 from utils   import set_seed, Logger, save_checkpoint, load_checkpoint
 
@@ -34,7 +35,7 @@ def parse_args():
     p.add_argument("--wd",          type=float, default=0.05)
     p.add_argument("--image-size",  type=int,   default=320)
     p.add_argument("--amp",         default="bfloat16", choices=["bfloat16", "float16", "none"])
-    p.add_argument("--out-dir",     default="checkpoints")
+    p.add_argument("--out-dir",     default="models")
     p.add_argument("--seed",        type=int,   default=42)
     p.add_argument("--num-workers", type=int,   default=2)
     return p.parse_args()
@@ -79,8 +80,9 @@ def main():
                                   warmup_lr_init=1e-7, warmup_prefix=True, t_in_epochs=False)
 
     out = Path(args.out_dir); out.mkdir(parents=True, exist_ok=True)
-    tracker  = Tracker("khana-phase2", system_metrics=True)
+    tracker   = Tracker("khana-phase2", system_metrics=True)
     best, best_path = 0.0, out / "best_ema_hires.pt"
+    history   = []
 
     with tracker.run(params=vars(args)):
         for epoch in range(1, args.epochs + 1):
@@ -92,16 +94,24 @@ def main():
             v_ema = evaluate(ema.module, val_loader, criterion, device, amp_dtype)
 
             lr = max(g["lr"] for g in optimizer.param_groups)
-            m  = {"train_loss": train_loss, "val_top1": val["top1"],
-                  "ema_top1": v_ema["top1"], "ema_top5": v_ema["top5"], "lr": lr}
+            m  = {"train_loss": train_loss, "val_loss": val["loss"],
+                  "val_top1": val["top1"],  "ema_top1": v_ema["top1"],
+                  "ema_top5": v_ema["top5"], "lr": lr}
             tracker.log(m, epoch); log.metrics(m, epoch)
+
+            history.append({"epoch": epoch, **m})
 
             if v_ema["top1"] > best:
                 best = v_ema["top1"]
-                save_checkpoint(best_path, epoch, model, ema, optimizer, scheduler, m, vars(args))
+                save_checkpoint(best_path, epoch, model, ema, optimizer, scheduler,
+                                m, vars(args), history)
                 log.ok(f"Hires best: {best:.2f}%")
 
     log.ok(f"Phase-2 done. Best EMA top-1: {best:.2f}%")
+
+    save_training_curves(history, out, prefix="phase2")
+    log.info(f"Training curves → {out}/phase2_training_curves.png")
+
     tracker.artifact(best_path); tracker.model(ema.module, "best_ema_hires")
 
 

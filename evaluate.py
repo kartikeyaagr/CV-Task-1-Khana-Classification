@@ -1,11 +1,13 @@
 """Final evaluation with optional 5-crop TTA.
 
 Run:
-    python evaluate.py --checkpoint checkpoints/best_ema_hires.pt
-    python evaluate.py --checkpoint checkpoints/best_ema_hires.pt --tta
+    python evaluate.py --checkpoint models/best_ema_hires.pt
+    python evaluate.py --checkpoint models/best_ema_hires.pt --tta
 """
 
 import argparse
+import json
+from contextlib import nullcontext
 from pathlib import Path
 
 import numpy as np
@@ -31,6 +33,7 @@ def parse_args():
     p.add_argument("--batch-size",  type=int, default=32)
     p.add_argument("--amp",         default="bfloat16", choices=["bfloat16", "float16", "none"])
     p.add_argument("--tta",         action="store_true")
+    p.add_argument("--out-file",    default=None, help="Path to save JSON results (auto-named if omitted)")
     return p.parse_args()
 
 
@@ -55,6 +58,13 @@ def main():
     results   = eval_loop(model, loader, criterion, device, amp_dtype)
     log.info(f"top-1: {results['top1']:.2f}%  top-5: {results['top5']:.2f}%")
 
+    report = {
+        "checkpoint": str(args.checkpoint),
+        "split":      args.split,
+        "top1":       round(results["top1"], 4),
+        "top5":       round(results["top5"], 4),
+    }
+
     if args.tta:
         tta_ds     = KhanaDataset(args.manifest, args.split, args.data_root,
                                   transform=tta_transforms(args.image_size))
@@ -62,11 +72,12 @@ def main():
                                 shuffle=False, num_workers=4, pin_memory=True)
         tta_res = evaluate_tta(model, tta_loader, device, amp_dtype)
         log.info(f"TTA top-1: {tta_res['tta_top1']:.2f}%  top-5: {tta_res['tta_top5']:.2f}%")
+        report["tta_top1"] = round(tta_res["tta_top1"], 4)
+        report["tta_top5"] = round(tta_res["tta_top5"], 4)
 
-    # Per-class accuracy and confusion matrix
+    # ── Per-class accuracy ────────────────────────────────────────────────────
     out = Path(args.checkpoint).parent
     all_p, all_t = [], []
-    from contextlib import nullcontext
     with torch.inference_mode():
         amp_ctx = torch.amp.autocast(device_type=device.type, dtype=amp_dtype) if amp_dtype else nullcontext()
         for imgs, tgts in log.tqdm(loader, desc="Per-class pass"):
@@ -75,12 +86,22 @@ def main():
                 all_p.extend(model(imgs).argmax(1).cpu().tolist())
             all_t.extend(tgts.tolist())
 
-    acc = per_class_accuracy(all_p, all_t, 80)
+    acc   = per_class_accuracy(all_p, all_t, 80)
     worst = np.argsort(acc)[:10]
     log.info("Bottom-10 classes:")
     for i in worst:
         log.info(f"  {ds.classes[i]:<30}  {acc[i]*100:.1f}%")
 
+    report["per_class"] = {ds.classes[i]: round(float(acc[i]), 4) for i in range(80)}
+
+    # ── Save JSON results ─────────────────────────────────────────────────────
+    out_file = Path(args.out_file) if args.out_file else out / f"results_{args.split}.json"
+    out_file.parent.mkdir(parents=True, exist_ok=True)
+    with open(out_file, "w") as f:
+        json.dump(report, f, indent=2)
+    log.ok(f"Results saved → {out_file}")
+
+    # ── CSV + confusion matrix ────────────────────────────────────────────────
     csv_path = out / f"per_class_{args.split}.csv"
     with open(csv_path, "w") as f:
         f.write("class,accuracy\n")
@@ -89,7 +110,7 @@ def main():
 
     cm_path = out / f"confusion_matrix_{args.split}.png"
     save_confusion_matrix(all_p, all_t, ds.classes, cm_path)
-    log.ok(f"Results → {out}")
+    log.ok(f"Artifacts → {out}")
 
 
 if __name__ == "__main__":

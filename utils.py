@@ -46,13 +46,14 @@ class Logger:
 
 # ── Checkpoint ────────────────────────────────────────────────────────────────
 
-def save_checkpoint(path, epoch, model, ema, optimizer, scheduler, metrics, config):
+def save_checkpoint(path, epoch, model, ema, optimizer, scheduler, metrics, config, history=None):
     Path(path).parent.mkdir(parents=True, exist_ok=True)
     torch.save({
         "epoch": epoch, "model": model.state_dict(),
         "ema":   ema.state_dict() if ema else None,
         "optimizer": optimizer.state_dict(), "scheduler": scheduler.state_dict(),
         "metrics": metrics, "config": config,
+        "history": history or [],
     }, path)
 
 

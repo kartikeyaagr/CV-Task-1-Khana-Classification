@@ -7,14 +7,13 @@ __pycache__/
 
 # Dataset / large files
 khana/
-../dataset.tar.gz
-../splits/
 
 # Training outputs
 checkpoints/
 checkpoints_debug/
 mlruns/
 diffusion_results/
+splits/
 *.pt
 *.pth
 

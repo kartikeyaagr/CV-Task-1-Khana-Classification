@@ -10,7 +10,7 @@ import mlflow.pytorch
 
 
 class Tracker:
-    def __init__(self, experiment: str, uri="mlruns", system_metrics=True):
+    def __init__(self, experiment: str, uri="sqlite:///mlruns.db", system_metrics=True):
         mlflow.set_tracking_uri(uri)
         mlflow.set_experiment(experiment)
         if system_metrics:
