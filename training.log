@@ -1,0 +1,245 @@
+============================================================
+  Phase 1 — convnext_small.fb_in22k_ft_in1k @ 224px for 50 epochs
+============================================================
+
+INFO  Device: cuda
+INFO  Train: 105,455  Val: 13,182  Classes: 80
+model.safetensors: 100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 201M/201M [00:16<00:00, 12.4MB/s]
+INFO  Model: convnext_small.fb_in22k_ft_in1k  (49.5M params)
+/home/cis-lab/Kartikeya/Khana-Image-Classification/.venv/lib/python3.12/site-packages/PIL/Image.py:1137: UserWarning: Palette images with Transparency expressed in bytes should be converted to RGBA images
+  warnings.warn(
+INFO  Aug preview → models/aug_preview.png
+2026/05/03 23:36:08 INFO mlflow.store.db.utils: Creating initial MLflow database tables...
+2026/05/03 23:36:08 INFO mlflow.store.db.utils: Updating database tables
+2026/05/03 23:36:08 INFO mlflow.tracking.fluent: Experiment with name 'khana-phase1' does not exist. Creating a new experiment.
+2026/05/03 23:36:08 INFO mlflow.system_metrics.system_metrics_monitor: Started monitoring system metrics.
+/home/cis-lab/Kartikeya/Khana-Image-Classification/.venv/lib/python3.12/site-packages/PIL/Image.py:1137: UserWarning: Palette images with Transparency expressed in bytes should be converted to RGBA images
+  warnings.warn(
+/home/cis-lab/Kartikeya/Khana-Image-Classification/.venv/lib/python3.12/site-packages/PIL/Image.py:1137: UserWarning: Palette images with Transparency expressed in bytes should be converted to RGBA images
+  warnings.warn(
+/home/cis-lab/Kartikeya/Khana-Image-Classification/.venv/lib/python3.12/site-packages/PIL/Image.py:1137: UserWarning: Palette images with Transparency expressed in bytes should be converted to RGBA images
+  warnings.warn(
+/home/cis-lab/Kartikeya/Khana-Image-Classification/.venv/lib/python3.12/site-packages/PIL/Image.py:1137: UserWarning: Palette images with Transparency expressed in bytes should be converted to RGBA images
+  warnings.warn(
+/home/cis-lab/Kartikeya/Khana-Image-Classification/.venv/lib/python3.12/site-packages/PIL/Image.py:1137: UserWarning: Palette images with Transparency expressed in bytes should be converted to RGBA images
+  warnings.warn(
+/home/cis-lab/Kartikeya/Khana-Image-Classification/.venv/lib/python3.12/site-packages/PIL/Image.py:1137: UserWarning: Palette images with Transparency expressed in bytes should be converted to RGBA images
+  warnings.warn(
+/home/cis-lab/Kartikeya/Khana-Image-Classification/.venv/lib/python3.12/site-packages/PIL/Image.py:1137: UserWarning: Palette images with Transparency expressed in bytes should be converted to RGBA images
+  warnings.warn(
+  epoch 001  train_loss=1.8030  val_loss=1.0772  val_top1=90.7298  val_top5=98.9152  ema_top1=57.1840  ema_top5=85.2526  lr=0.0002
+OK    New best EMA top-1: 57.18%
+  epoch 002  train_loss=1.4387  val_loss=1.0110  val_top1=92.2015  val_top5=99.1352  ema_top1=87.5360  ema_top5=98.2628  lr=0.0003
+OK    New best EMA top-1: 87.54%
+  epoch 003  train_loss=1.3742  val_loss=0.9813  val_top1=92.7173  val_top5=99.2566  ema_top1=91.4580  ema_top5=98.9910  lr=0.0004
+OK    New best EMA top-1: 91.46%
+  epoch 004  train_loss=1.3341  val_loss=0.9681  val_top1=93.2029  val_top5=99.2490  ema_top1=92.6642  ema_top5=99.2262  lr=0.0005
+OK    New best EMA top-1: 92.66%
+  epoch 005  train_loss=1.3184  val_loss=0.9610  val_top1=93.4532  val_top5=99.2262  ema_top1=93.4835  ema_top5=99.3628  lr=0.0005
+OK    New best EMA top-1: 93.48%
+  epoch 006  train_loss=1.2774  val_loss=0.9447  val_top1=94.0449  val_top5=99.2793  ema_top1=94.0677  ema_top5=99.3931  lr=0.0005
+OK    New best EMA top-1: 94.07%
+  epoch 007  train_loss=1.2822  val_loss=0.9511  val_top1=94.1435  val_top5=99.2110  ema_top1=94.4546  ema_top5=99.4386  lr=0.0005
+OK    New best EMA top-1: 94.45%
+  epoch 008  train_loss=1.2410  val_loss=0.9489  val_top1=93.7794  val_top5=99.2717  ema_top1=94.7125  ema_top5=99.4386  lr=0.0005
+OK    New best EMA top-1: 94.71%
+  epoch 009  train_loss=1.2225  val_loss=0.9456  val_top1=94.1056  val_top5=99.2262  ema_top1=94.8566  ema_top5=99.4386  lr=0.0005
+OK    New best EMA top-1: 94.86%
+  epoch 010  train_loss=1.2091  val_loss=0.9387  val_top1=94.5456  val_top5=99.2186  ema_top1=94.9401  ema_top5=99.4310  lr=0.0005
+OK    New best EMA top-1: 94.94%
+  epoch 011  train_loss=1.1988  val_loss=0.9351  val_top1=94.6594  val_top5=99.2793  ema_top1=95.0842  ema_top5=99.4538  lr=0.0005
+OK    New best EMA top-1: 95.08%
+  epoch 012  train_loss=1.2084  val_loss=0.9344  val_top1=94.6063  val_top5=99.2110  ema_top1=95.1297  ema_top5=99.4235  lr=0.0005
+OK    New best EMA top-1: 95.13%
+  epoch 013  train_loss=1.1916  val_loss=0.9336  val_top1=94.8263  val_top5=99.2490  ema_top1=95.2208  ema_top5=99.4310  lr=0.0005
+OK    New best EMA top-1: 95.22%
+  epoch 014  train_loss=1.1610  val_loss=0.9367  val_top1=94.5684  val_top5=99.1655  ema_top1=95.2511  ema_top5=99.4159  lr=0.0005
+OK    New best EMA top-1: 95.25%
+  epoch 015  train_loss=1.1501  val_loss=0.9450  val_top1=94.5608  val_top5=99.2641  ema_top1=95.2890  ema_top5=99.4386  lr=0.0004
+OK    New best EMA top-1: 95.29%
+  epoch 016  train_loss=1.1432  val_loss=0.9364  val_top1=94.7352  val_top5=99.2641  ema_top1=95.3042  ema_top5=99.4462  lr=0.0004
+OK    New best EMA top-1: 95.30%
+  epoch 017  train_loss=1.1307  val_loss=0.9410  val_top1=94.7883  val_top5=99.2110  ema_top1=95.3194  ema_top5=99.4159  lr=0.0004
+OK    New best EMA top-1: 95.32%
+  epoch 018  train_loss=1.1365  val_loss=0.9413  val_top1=94.7883  val_top5=99.1883  ema_top1=95.3497  ema_top5=99.4159  lr=0.0004
+OK    New best EMA top-1: 95.35%
+  epoch 019  train_loss=1.1223  val_loss=0.9388  val_top1=94.9628  val_top5=99.1883  ema_top1=95.4028  ema_top5=99.4310  lr=0.0004
+OK    New best EMA top-1: 95.40%
+  epoch 020  train_loss=1.1161  val_loss=0.9438  val_top1=94.7428  val_top5=99.0593  ema_top1=95.4863  ema_top5=99.4159  lr=0.0004
+OK    New best EMA top-1: 95.49%
+  epoch 021  train_loss=1.1288  val_loss=0.9317  val_top1=95.0690  val_top5=99.1200  ema_top1=95.3573  ema_top5=99.3931  lr=0.0004
+  epoch 022  train_loss=1.1244  val_loss=0.9462  val_top1=94.8263  val_top5=99.1807  ema_top1=95.4028  ema_top5=99.3855  lr=0.0004
+  epoch 023  train_loss=1.0935  val_loss=0.9445  val_top1=94.8490  val_top5=99.1276  ema_top1=95.4180  ema_top5=99.4159  lr=0.0003
+  epoch 024  train_loss=1.1007  val_loss=0.9380  val_top1=95.1677  val_top5=98.9986  ema_top1=95.4939  ema_top5=99.3855  lr=0.0003
+OK    New best EMA top-1: 95.49%
+  epoch 025  train_loss=1.1013  val_loss=0.9470  val_top1=95.0159  val_top5=99.0366  ema_top1=95.5545  ema_top5=99.3628  lr=0.0003
+OK    New best EMA top-1: 95.55%
+  epoch 026  train_loss=1.0929  val_loss=0.9449  val_top1=95.0690  val_top5=99.0442  ema_top1=95.5773  ema_top5=99.3248  lr=0.0003
+OK    New best EMA top-1: 95.58%
+  epoch 027  train_loss=1.0938  val_loss=0.9465  val_top1=94.8870  val_top5=99.0745  ema_top1=95.5849  ema_top5=99.3248  lr=0.0003
+OK    New best EMA top-1: 95.58%
+  epoch 028  train_loss=1.0983  val_loss=0.9428  val_top1=95.0918  val_top5=99.0669  ema_top1=95.6001  ema_top5=99.2945  lr=0.0003
+OK    New best EMA top-1: 95.60%
+  epoch 029  train_loss=1.1119  val_loss=0.9475  val_top1=95.0614  val_top5=98.9683  ema_top1=95.5621  ema_top5=99.3097  lr=0.0003
+  epoch 030  train_loss=1.0909  val_loss=0.9440  val_top1=95.0994  val_top5=98.9835  ema_top1=95.5090  ema_top5=99.3021  lr=0.0002
+  epoch 031  train_loss=1.0668  val_loss=0.9471  val_top1=95.0842  val_top5=98.8545  ema_top1=95.5545  ema_top5=99.2793  lr=0.0002
+  epoch 032  train_loss=1.0831  val_loss=0.9512  val_top1=95.1297  val_top5=98.9076  ema_top1=95.5090  ema_top5=99.2035  lr=0.0002
+  epoch 033  train_loss=1.0729  val_loss=0.9479  val_top1=95.1221  val_top5=98.9607  ema_top1=95.5090  ema_top5=99.2110  lr=0.0002
+  epoch 034  train_loss=1.0657  val_loss=0.9496  val_top1=95.3497  val_top5=98.8317  ema_top1=95.5394  ema_top5=99.1504  lr=0.0002
+  epoch 035  train_loss=1.0702  val_loss=0.9429  val_top1=95.4635  val_top5=98.8773  ema_top1=95.5470  ema_top5=99.0821  lr=0.0002
+  epoch 036  train_loss=1.0836  val_loss=0.9454  val_top1=95.4332  val_top5=98.9228  ema_top1=95.5545  ema_top5=99.0593  lr=0.0001
+  epoch 037  train_loss=1.0678  val_loss=0.9485  val_top1=95.2435  val_top5=98.8469  ema_top1=95.5621  ema_top5=99.0669  lr=0.0001
+  epoch 038  train_loss=1.0640  val_loss=0.9480  val_top1=95.3042  val_top5=98.8621  ema_top1=95.5318  ema_top5=99.0366  lr=0.0001
+  epoch 039  train_loss=1.0788  val_loss=0.9486  val_top1=95.2359  val_top5=98.8773  ema_top1=95.4408  ema_top5=99.0669  lr=0.0001
+  epoch 040  train_loss=1.0631  val_loss=0.9461  val_top1=95.2966  val_top5=98.8924  ema_top1=95.4635  ema_top5=99.0366  lr=0.0001
+  epoch 041  train_loss=1.0428  val_loss=0.9533  val_top1=95.2359  val_top5=98.8924  ema_top1=95.4332  ema_top5=99.0214  lr=0.0001
+  epoch 042  train_loss=1.0547  val_loss=0.9471  val_top1=95.2663  val_top5=98.8848  ema_top1=95.4028  ema_top5=99.0062  lr=0.0001
+  epoch 043  train_loss=1.0441  val_loss=0.9493  val_top1=95.2283  val_top5=98.8924  ema_top1=95.3801  ema_top5=98.9910  lr=0.0001
+  epoch 044  train_loss=1.0493  val_loss=0.9499  val_top1=95.2890  val_top5=98.8545  ema_top1=95.3649  ema_top5=98.9683  lr=0.0000
+  epoch 045  train_loss=1.0370  val_loss=0.9485  val_top1=95.2663  val_top5=98.9000  ema_top1=95.3345  ema_top5=98.9607  lr=0.0000
+  epoch 046  train_loss=1.0388  val_loss=0.9479  val_top1=95.3345  val_top5=98.8924  ema_top1=95.3270  ema_top5=98.9304  lr=0.0000
+  epoch 047  train_loss=1.0423  val_loss=0.9501  val_top1=95.2966  val_top5=98.8924  ema_top1=95.3573  ema_top5=98.9304  lr=0.0000
+  epoch 048  train_loss=1.0553  val_loss=0.9498  val_top1=95.3497  val_top5=98.8924  ema_top1=95.3194  ema_top5=98.9076  lr=0.0000
+  epoch 049  train_loss=1.0629  val_loss=0.9488  val_top1=95.3876  val_top5=98.9152  ema_top1=95.3345  ema_top5=98.9304  lr=0.0000
+  epoch 050  train_loss=1.0578  val_loss=0.9491  val_top1=95.3345  val_top5=98.8545  ema_top1=95.3497  ema_top5=98.9379  lr=0.0000
+OK    Done. Best EMA top-1: 95.60%  →  models/best_ema.pt
+INFO  Training curves → models/phase1_training_curves.png
+2026/05/04 03:56:39 INFO mlflow.utils.uv_utils: Detected uv project: found uv.lock and pyproject.toml in /home/cis-lab/Kartikeya/Khana-Image-Classification
+2026/05/04 03:56:40 WARNING mlflow.pytorch: Saving pytorch model by Pickle or CloudPickle format requires exercising caution because these formats rely on Python's object serialization mechanism, which can execute arbitrary code during deserialization. The recommended safe alternative is to set `serialization_format` to 'pt2' to save the PyTorch model using the safe graph model format.
+2026/05/04 03:56:40 INFO mlflow.utils.uv_utils: Detected uv project: found uv.lock and pyproject.toml in /home/cis-lab/Kartikeya/Khana-Image-Classification
+2026/05/04 03:56:40 INFO mlflow.utils.environment: Detected uv project at /home/cis-lab/Kartikeya/Khana-Image-Classification. Attempting to export requirements via 'uv export'.
+2026/05/04 03:56:40 WARNING mlflow.utils.uv_utils: uv is not available or version is below minimum required. Falling back to pip-based inference.
+2026/05/04 03:56:40 WARNING mlflow.utils.environment: uv export failed or returned no requirements. Falling back to package capture based inference.
+2026/05/04 03:56:43 INFO mlflow.system_metrics.system_metrics_monitor: Stopping system metrics monitoring...
+2026/05/04 03:56:43 INFO mlflow.system_metrics.system_metrics_monitor: Successfully terminated system metrics monitoring!
+
+============================================================
+  Finetune stage 224px → 320px  (batch 24, lr 1e-04, 8 epochs)
+============================================================
+
+INFO  Loaded models/best_ema.pt  →  fine-tuning @ 320px
+2026/05/04 03:57:29 INFO mlflow.tracking.fluent: Experiment with name 'khana-phase2' does not exist. Creating a new experiment.
+2026/05/04 03:57:29 INFO mlflow.system_metrics.system_metrics_monitor: Started monitoring system metrics.
+/home/cis-lab/Kartikeya/Khana-Image-Classification/.venv/lib/python3.12/site-packages/PIL/Image.py:1137: UserWarning: Palette images with Transparency expressed in bytes should be converted to RGBA images
+  warnings.warn(
+/home/cis-lab/Kartikeya/Khana-Image-Classification/.venv/lib/python3.12/site-packages/PIL/Image.py:1137: UserWarning: Palette images with Transparency expressed in bytes should be converted to RGBA images
+  warnings.warn(
+/home/cis-lab/Kartikeya/Khana-Image-Classification/.venv/lib/python3.12/site-packages/PIL/Image.py:1137: UserWarning: Palette images with Transparency expressed in bytes should be converted to RGBA images
+  warnings.warn(
+/home/cis-lab/Kartikeya/Khana-Image-Classification/.venv/lib/python3.12/site-packages/PIL/Image.py:1137: UserWarning: Palette images with Transparency expressed in bytes should be converted to RGBA images
+  warnings.warn(
+  epoch 001  train_loss=0.8003  val_loss=0.9276  val_top1=95.6380  ema_top1=95.6683  ema_top5=99.2490  lr=0.0001
+OK    Hires best: 95.67%
+  epoch 002  train_loss=0.7932  val_loss=0.9300  val_top1=95.6759  ema_top1=95.7518  ema_top5=99.2414  lr=0.0001
+OK    Hires best: 95.75%
+  epoch 003  train_loss=0.7903  val_loss=0.9306  val_top1=95.6380  ema_top1=95.7821  ema_top5=99.2414  lr=0.0001
+OK    Hires best: 95.78%
+  epoch 004  train_loss=0.7870  val_loss=0.9300  val_top1=95.7290  ema_top1=95.8352  ema_top5=99.2035  lr=0.0001
+OK    Hires best: 95.84%
+  epoch 005  train_loss=0.7863  val_loss=0.9318  val_top1=95.6532  ema_top1=95.8201  ema_top5=99.1048  lr=0.0000
+  epoch 006  train_loss=0.7849  val_loss=0.9320  val_top1=95.6001  ema_top1=95.7518  ema_top5=99.0897  lr=0.0000
+  epoch 007  train_loss=0.7834  val_loss=0.9317  val_top1=95.7063  ema_top1=95.7214  ema_top5=99.0973  lr=0.0000
+  epoch 008  train_loss=0.7833  val_loss=0.9313  val_top1=95.6835  ema_top1=95.7290  ema_top5=99.0973  lr=0.0000
+2026/05/04 05:18:35 INFO mlflow.system_metrics.system_metrics_monitor: Stopping system metrics monitoring...
+2026/05/04 05:18:35 INFO mlflow.system_metrics.system_metrics_monitor: Successfully terminated system metrics monitoring!
+OK    Phase-2 done. Best EMA top-1: 95.84%
+INFO  Training curves → models/320/phase2_training_curves.png
+2026/05/04 05:18:36 INFO mlflow.system_metrics.system_metrics_monitor: Started monitoring system metrics.
+2026/05/04 05:18:36 INFO mlflow.utils.uv_utils: Detected uv project: found uv.lock and pyproject.toml in /home/cis-lab/Kartikeya/Khana-Image-Classification
+2026/05/04 05:18:36 WARNING mlflow.pytorch: Saving pytorch model by Pickle or CloudPickle format requires exercising caution because these formats rely on Python's object serialization mechanism, which can execute arbitrary code during deserialization. The recommended safe alternative is to set `serialization_format` to 'pt2' to save the PyTorch model using the safe graph model format.
+2026/05/04 05:18:36 INFO mlflow.utils.uv_utils: Detected uv project: found uv.lock and pyproject.toml in /home/cis-lab/Kartikeya/Khana-Image-Classification
+2026/05/04 05:18:36 INFO mlflow.utils.environment: Detected uv project at /home/cis-lab/Kartikeya/Khana-Image-Classification. Attempting to export requirements via 'uv export'.
+2026/05/04 05:18:36 WARNING mlflow.utils.uv_utils: uv is not available or version is below minimum required. Falling back to pip-based inference.
+2026/05/04 05:18:36 WARNING mlflow.utils.environment: uv export failed or returned no requirements. Falling back to package capture based inference.
+2026/05/04 05:18:59 INFO mlflow.system_metrics.system_metrics_monitor: Stopping system metrics monitoring...
+2026/05/04 05:18:59 INFO mlflow.system_metrics.system_metrics_monitor: Successfully terminated system metrics monitoring!
+
+============================================================
+  Finetune stage 320px → 384px  (batch 16, lr 5e-05, 8 epochs)
+============================================================
+
+INFO  Loaded models/320/best_ema_hires.pt  →  fine-tuning @ 384px
+2026/05/04 05:19:04 INFO mlflow.system_metrics.system_metrics_monitor: Started monitoring system metrics.
+/home/cis-lab/Kartikeya/Khana-Image-Classification/.venv/lib/python3.12/site-packages/PIL/Image.py:1137: UserWarning: Palette images with Transparency expressed in bytes should be converted to RGBA images
+  warnings.warn(
+/home/cis-lab/Kartikeya/Khana-Image-Classification/.venv/lib/python3.12/site-packages/PIL/Image.py:1137: UserWarning: Palette images with Transparency expressed in bytes should be converted to RGBA images
+  warnings.warn(
+/home/cis-lab/Kartikeya/Khana-Image-Classification/.venv/lib/python3.12/site-packages/PIL/Image.py:1137: UserWarning: Palette images with Transparency expressed in bytes should be converted to RGBA images
+  warnings.warn(
+/home/cis-lab/Kartikeya/Khana-Image-Classification/.venv/lib/python3.12/site-packages/PIL/Image.py:1137: UserWarning: Palette images with Transparency expressed in bytes should be converted to RGBA images
+  warnings.warn(
+  epoch 001  train_loss=0.7889  val_loss=0.9343  val_top1=95.5318  ema_top1=95.6607  ema_top5=99.1579  lr=0.0000
+OK    Hires best: 95.66%
+  epoch 002  train_loss=0.7884  val_loss=0.9377  val_top1=95.5318  ema_top1=95.6987  ema_top5=99.0973  lr=0.0000
+OK    Hires best: 95.70%
+  epoch 003  train_loss=0.7870  val_loss=0.9371  val_top1=95.5849  ema_top1=95.6304  ema_top5=99.0517  lr=0.0000
+  epoch 004  train_loss=0.7843  val_loss=0.9385  val_top1=95.6456  ema_top1=95.6607  ema_top5=98.9910  lr=0.0000
+  epoch 005  train_loss=0.7857  val_loss=0.9376  val_top1=95.6228  ema_top1=95.6683  ema_top5=99.0062  lr=0.0000
+  epoch 006  train_loss=0.7842  val_loss=0.9379  val_top1=95.6304  ema_top1=95.6152  ema_top5=98.9910  lr=0.0000
+  epoch 007  train_loss=0.7839  val_loss=0.9369  val_top1=95.6380  ema_top1=95.6380  ema_top5=98.9759  lr=0.0000
+  epoch 008  train_loss=0.7846  val_loss=0.9368  val_top1=95.6304  ema_top1=95.6380  ema_top5=98.9683  lr=0.0000
+2026/05/04 07:15:07 INFO mlflow.system_metrics.system_metrics_monitor: Stopping system metrics monitoring...
+2026/05/04 07:15:07 INFO mlflow.system_metrics.system_metrics_monitor: Successfully terminated system metrics monitoring!
+OK    Phase-2 done. Best EMA top-1: 95.70%
+INFO  Training curves → models/384/phase2_training_curves.png
+2026/05/04 07:15:08 INFO mlflow.system_metrics.system_metrics_monitor: Started monitoring system metrics.
+2026/05/04 07:15:08 INFO mlflow.utils.uv_utils: Detected uv project: found uv.lock and pyproject.toml in /home/cis-lab/Kartikeya/Khana-Image-Classification
+2026/05/04 07:15:08 WARNING mlflow.pytorch: Saving pytorch model by Pickle or CloudPickle format requires exercising caution because these formats rely on Python's object serialization mechanism, which can execute arbitrary code during deserialization. The recommended safe alternative is to set `serialization_format` to 'pt2' to save the PyTorch model using the safe graph model format.
+2026/05/04 07:15:08 INFO mlflow.utils.uv_utils: Detected uv project: found uv.lock and pyproject.toml in /home/cis-lab/Kartikeya/Khana-Image-Classification
+2026/05/04 07:15:08 INFO mlflow.utils.environment: Detected uv project at /home/cis-lab/Kartikeya/Khana-Image-Classification. Attempting to export requirements via 'uv export'.
+2026/05/04 07:15:08 WARNING mlflow.utils.uv_utils: uv is not available or version is below minimum required. Falling back to pip-based inference.
+2026/05/04 07:15:08 WARNING mlflow.utils.environment: uv export failed or returned no requirements. Falling back to package capture based inference.
+2026/05/04 07:15:31 INFO mlflow.system_metrics.system_metrics_monitor: Stopping system metrics monitoring...
+2026/05/04 07:15:31 INFO mlflow.system_metrics.system_metrics_monitor: Successfully terminated system metrics monitoring!
+
+============================================================
+  Evaluate @ 384px on test + TTA
+============================================================
+
+INFO  Loaded models/384/best_ema_hires.pt
+INFO  Evaluating test: 13,182 images
+/home/cis-lab/Kartikeya/Khana-Image-Classification/.venv/lib/python3.12/site-packages/PIL/Image.py:1137: UserWarning: Palette images with Transparency expressed in bytes should be converted to RGBA images
+  warnings.warn(
+/home/cis-lab/Kartikeya/Khana-Image-Classification/.venv/lib/python3.12/site-packages/PIL/Image.py:1137: UserWarning: Palette images with Transparency expressed in bytes should be converted to RGBA images
+  warnings.warn(
+/home/cis-lab/Kartikeya/Khana-Image-Classification/.venv/lib/python3.12/site-packages/PIL/Image.py:1137: UserWarning: Palette images with Transparency expressed in bytes should be converted to RGBA images
+  warnings.warn(
+/home/cis-lab/Kartikeya/Khana-Image-Classification/.venv/lib/python3.12/site-packages/PIL/Image.py:1137: UserWarning: Palette images with Transparency expressed in bytes should be converted to RGBA images
+  warnings.warn(
+INFO  top-1: 95.78%  top-5: 98.93%
+/home/cis-lab/Kartikeya/Khana-Image-Classification/.venv/lib/python3.12/site-packages/PIL/Image.py:1137: UserWarning: Palette images with Transparency expressed in bytes should be converted to RGBA images
+  warnings.warn(
+/home/cis-lab/Kartikeya/Khana-Image-Classification/.venv/lib/python3.12/site-packages/PIL/Image.py:1137: UserWarning: Palette images with Transparency expressed in bytes should be converted to RGBA images
+  warnings.warn(
+/home/cis-lab/Kartikeya/Khana-Image-Classification/.venv/lib/python3.12/site-packages/PIL/Image.py:1137: UserWarning: Palette images with Transparency expressed in bytes should be converted to RGBA images
+  warnings.warn(
+/home/cis-lab/Kartikeya/Khana-Image-Classification/.venv/lib/python3.12/site-packages/PIL/Image.py:1137: UserWarning: Palette images with Transparency expressed in bytes should be converted to RGBA images
+  warnings.warn(
+INFO  TTA top-1: 95.77%  top-5: 98.98%
+/home/cis-lab/Kartikeya/Khana-Image-Classification/.venv/lib/python3.12/site-packages/PIL/Image.py:1137: UserWarning: Palette images with Transparency expressed in bytes should be converted to
+RGBA images
+  warnings.warn(
+/home/cis-lab/Kartikeya/Khana-Image-Classification/.venv/lib/python3.12/site-packages/PIL/Image.py:1137: UserWarning: Palette images with Transparency expressed in bytes should be converted to
+RGBA images
+  warnings.warn(
+/home/cis-lab/Kartikeya/Khana-Image-Classification/.venv/lib/python3.12/site-packages/PIL/Image.py:1137: UserWarning: Palette images with Transparency expressed in bytes should be converted to
+RGBA images
+  warnings.warn(
+/home/cis-lab/Kartikeya/Khana-Image-Classification/.venv/lib/python3.12/site-packages/PIL/Image.py:1137: UserWarning: Palette images with Transparency expressed in bytes should be converted to
+RGBA images
+  warnings.warn(
+INFO  Bottom-10 classes:
+INFO    amritsari kulcha                48.1%
+INFO    phirni                          74.3%
+INFO    chicken pizza                   82.7%
+INFO    aloo methi                      83.3%
+INFO    pepperoni pizza                 84.4%
+INFO    sev puri                        84.7%
+INFO    set dosa                        84.7%
+INFO    kheer                           85.1%
+INFO    paneer pizza                    85.5%
+INFO    boondi laddu                    87.0%
+OK    Results saved → models/384/results_test.json
+OK    Artifacts → models/384
+
+[pipeline] All done. Results in models/
