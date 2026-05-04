@@ -1,12 +1,12 @@
 # Khana Image Classification
 
-80-class food image classifier built on ConvNeXt-Small with progressive resolution fine-tuning. Achieves **95.3% top-1 accuracy** on the test set.
+80-class food image classifier built on ConvNeXt-Small with progressive resolution fine-tuning. Achieves **95.78% top-1 accuracy** (95.77% with TTA) on the test set.
 
 ## Overview
 
 Two-phase training pipeline:
 
-1. **Phase 1** — Full fine-tune of ConvNeXt-Small (pretrained on ImageNet-22K → ImageNet-1K) at 224px for 25 epochs with MixUp/CutMix augmentation and stem freezing for the first 5 epochs.
+1. **Phase 1** — Full fine-tune of ConvNeXt-Small (pretrained on ImageNet-22K → ImageNet-1K) at 224px for 50 epochs with MixUp/CutMix augmentation and stem freezing for the first 5 epochs.
 2. **Phase 2** — High-resolution fine-tuning at progressively larger resolutions (320px → 384px → ...) on hard labels, with layer-decay AdamW and automatic batch scaling.
 
 Both phases track an EMA (Exponential Moving Average) model, which consistently outperforms the raw model and is used for all evaluation and checkpointing.
@@ -83,7 +83,7 @@ python prepare_splits.py
 ### Quick start — full pipeline
 
 ```bash
-# Phase 1 (224px, 25 epochs) → Phase 2 (320px, 8 epochs) → Evaluate
+# Phase 1 (224px, 50 epochs) → Phase 2 (320px, 8 epochs) → Evaluate
 python pipeline.py
 
 # Progressive: 224 → 320 → 384 → evaluate
@@ -139,10 +139,30 @@ python pipeline.py --skip-train --skip-sizes 320 --finetune-sizes 320 384
 
 ## Results
 
-| Stage | Top-1 | Top-5 |
-|---|---|---|
-| Phase 1 (224px, 25 epochs) | 95.13% | — |
-| Phase 2 (320px, 8 epochs) | **95.3%** | — |
+Training dataset: 105,455 images · Validation: 13,182 images · 80 classes
+
+| Stage | Resolution | Epochs | EMA Top-1 | EMA Top-5 |
+|---|---|---|---|---|
+| Phase 1 | 224px | 50 | 95.60% | 99.28% |
+| Phase 2 | 320px | 8 | 95.84% | 99.20% |
+| Phase 2 | 384px | 8 | 95.70% | 99.10% |
+| **Final eval (test set)** | **384px** | — | **95.78%** | **98.93%** |
+| Final eval + TTA | 384px | — | 95.77% | 98.98% |
+
+### Hardest classes (bottom-10 accuracy)
+
+| Class | Top-1 |
+|---|---|
+| amritsari kulcha | 48.1% |
+| phirni | 74.3% |
+| chicken pizza | 82.7% |
+| aloo methi | 83.3% |
+| pepperoni pizza | 84.4% |
+| sev puri | 84.7% |
+| set dosa | 84.7% |
+| kheer | 85.1% |
+| paneer pizza | 85.5% |
+| boondi laddu | 87.0% |
 
 Evaluation produces:
 - `results_test.json` — top-1, top-5, per-class accuracy dict
