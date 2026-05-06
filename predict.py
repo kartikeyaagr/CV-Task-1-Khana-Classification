@@ -1,20 +1,20 @@
 """Test a trained checkpoint on a new folder of images.
 
 Labeled mode   — folder contains one subdirectory per class:
-    test_images/
+    predict/
     ├── biryani/img1.jpg
     └── chapati/img2.jpg
   → Reports top-1 / top-5 accuracy, per-class breakdown, and a CSV.
 
 Unlabeled mode — flat folder with images, no subdirectories:
-    test_images/
+    predict/
     ├── photo1.jpg
     └── photo2.jpg
   → Reports top-5 predicted classes per image (no accuracy).
 
 Run:
-    uv run python test_images.py --images-dir /path/to/folder --checkpoint models/384/best_ema_hires.pt --image-size 384
-    uv run python test_images.py --images-dir /path/to/folder --checkpoint models/384/best_ema_hires.pt --image-size 384 --tta
+    uv run python predict.py --images-dir /path/to/folder --checkpoint models/384/best_ema_hires.pt --image-size 384
+    uv run python predict.py --images-dir /path/to/folder --checkpoint models/384/best_ema_hires.pt --image-size 384 --tta
 """
 
 import argparse
@@ -29,7 +29,7 @@ from PIL import Image
 from torch.utils.data import DataLoader, Dataset
 from torchvision.transforms import v2
 
-from data  import val_transforms, IMAGENET_MEAN, IMAGENET_STD
+from data import val_transforms, IMAGENET_MEAN, IMAGENET_STD
 from model import build_model
 from utils import Logger, load_checkpoint
 
@@ -37,6 +37,7 @@ IMAGE_EXTS = {".jpg", ".jpeg", ".png", ".webp", ".bmp", ".tiff", ".tif"}
 
 
 # ── Dataset helpers ───────────────────────────────────────────────────────────
+
 
 class ImageFolderDataset(Dataset):
     """Loads images from a flat or class-structured directory."""
@@ -61,17 +62,24 @@ def collate_fn(batch):
 
 # ── TTA (5-crop) ──────────────────────────────────────────────────────────────
 
+
 def tta_transform(image_size: int):
     resize = int(image_size * 1.143)
-    return v2.Compose([
-        v2.Resize(resize, interpolation=v2.InterpolationMode.BICUBIC, antialias=True),
-        v2.ToImage(),
-        v2.ToDtype(torch.float32, scale=True),
-        v2.Normalize(IMAGENET_MEAN, IMAGENET_STD),
-    ])
+    return v2.Compose(
+        [
+            v2.Resize(
+                resize, interpolation=v2.InterpolationMode.BICUBIC, antialias=True
+            ),
+            v2.ToImage(),
+            v2.ToDtype(torch.float32, scale=True),
+            v2.Normalize(IMAGENET_MEAN, IMAGENET_STD),
+        ]
+    )
 
 
-def predict_tta(model, img_batch: torch.Tensor, image_size: int, device, amp_ctx) -> torch.Tensor:
+def predict_tta(
+    model, img_batch: torch.Tensor, image_size: int, device, amp_ctx
+) -> torch.Tensor:
     """Five-crop TTA: centre + four corners, averaged in prob space."""
     crops = v2.FiveCrop(image_size)
     all_logits = []
@@ -83,10 +91,14 @@ def predict_tta(model, img_batch: torch.Tensor, image_size: int, device, amp_ctx
 
 # ── Inference ─────────────────────────────────────────────────────────────────
 
-def run_inference(model, loader, device, amp_dtype, use_tta: bool, image_size: int, log):
+
+def run_inference(
+    model, loader, device, amp_dtype, use_tta: bool, image_size: int, log
+):
     amp_ctx = (
         torch.amp.autocast(device_type=device.type, dtype=amp_dtype)
-        if amp_dtype else nullcontext()
+        if amp_dtype
+        else nullcontext()
     )
     all_probs, all_paths = [], []
 
@@ -106,6 +118,7 @@ def run_inference(model, loader, device, amp_dtype, use_tta: bool, image_size: i
 
 # ── Accuracy helpers ──────────────────────────────────────────────────────────
 
+
 def topk_correct(probs: torch.Tensor, labels: torch.Tensor, k: int) -> int:
     topk = probs.topk(k, dim=1).indices
     return topk.eq(labels.unsqueeze(1)).any(dim=1).sum().item()
@@ -113,38 +126,60 @@ def topk_correct(probs: torch.Tensor, labels: torch.Tensor, k: int) -> int:
 
 # ── CLI ───────────────────────────────────────────────────────────────────────
 
+
 def parse_args():
     p = argparse.ArgumentParser(description="Test model on a new image folder")
-    p.add_argument("--images-dir",  required=True, help="Folder of test images")
-    p.add_argument("--checkpoint",  required=True, help="Path to .pt checkpoint")
-    p.add_argument("--manifest",    default="splits/manifest.json",
-                   help="Manifest JSON (used to load class list)")
-    p.add_argument("--model",       default="convnext_small.fb_in22k_ft_in1k")
-    p.add_argument("--image-size",  type=int, default=384)
-    p.add_argument("--batch-size",  type=int, default=32)
+    p.add_argument(
+        "--images-dir", required=True, help="Folder of test images", default="images"
+    )
+    p.add_argument(
+        "--checkpoint",
+        required=True,
+        help="Path to .pt checkpoint",
+        default="models/320/best_ema_hires.pt",
+    )
+    p.add_argument(
+        "--manifest",
+        default="splits/manifest.json",
+        help="Manifest JSON (used to load class list)",
+    )
+    p.add_argument("--model", default="convnext_small.fb_in22k_ft_in1k")
+    p.add_argument("--image-size", type=int, default=384)
+    p.add_argument("--batch-size", type=int, default=32)
     p.add_argument("--num-workers", type=int, default=4)
-    p.add_argument("--amp",         default="bfloat16", choices=["bfloat16", "float16", "none"])
-    p.add_argument("--tta",         action="store_true", help="5-crop test-time augmentation")
-    p.add_argument("--top-k",       type=int, default=5,
-                   help="Top-k predictions printed per image in unlabeled mode")
-    p.add_argument("--out-file",    default=None,
-                   help="Save results JSON here (auto-named if omitted)")
+    p.add_argument("--amp", default="bfloat16", choices=["bfloat16", "float16", "none"])
+    p.add_argument("--tta", action="store_true", help="5-crop test-time augmentation")
+    p.add_argument(
+        "--top-k",
+        type=int,
+        default=5,
+        help="Top-k predictions printed per image in unlabeled mode",
+    )
+    p.add_argument(
+        "--out-file",
+        default=None,
+        help="Save results JSON here (auto-named if omitted)",
+    )
     return p.parse_args()
 
 
 def main():
     args = parse_args()
-    log  = Logger()
+    log = Logger()
 
     # ── Device + AMP ──────────────────────────────────────────────────────────
-    device    = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    amp_dtype = {"bfloat16": torch.bfloat16, "float16": torch.float16, "none": None}[args.amp]
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    amp_dtype = {"bfloat16": torch.bfloat16, "float16": torch.float16, "none": None}[
+        args.amp
+    ]
     log.info(f"Device: {device}  AMP: {args.amp}  TTA: {args.tta}")
 
     # ── Load class list from manifest ─────────────────────────────────────────
     manifest_path = Path(args.manifest)
     if not manifest_path.exists():
-        log.warn(f"Manifest not found at {manifest_path}. Cannot map predictions to class names.")
+        log.warn(
+            f"Manifest not found at {manifest_path}. Cannot map predictions to class names."
+        )
         sys.exit(1)
     with open(manifest_path) as f:
         classes: list[str] = json.load(f)["classes"]
@@ -159,7 +194,9 @@ def main():
         sys.exit(1)
 
     # Labeled: subdirs match known class names
-    subdirs = [d for d in images_dir.iterdir() if d.is_dir() and not d.name.startswith(".")]
+    subdirs = [
+        d for d in images_dir.iterdir() if d.is_dir() and not d.name.startswith(".")
+    ]
     labeled_subdirs = [d for d in subdirs if d.name in class_to_idx]
 
     if labeled_subdirs:
@@ -177,7 +214,9 @@ def main():
         labeled = True
         log.info(f"Found {len(image_paths):,} labeled images")
     else:
-        log.info("Unlabeled mode — no class subdirectories detected, running prediction only")
+        log.info(
+            "Unlabeled mode — no class subdirectories detected, running prediction only"
+        )
         image_paths = sorted(
             f for f in images_dir.iterdir() if f.suffix.lower() in IMAGE_EXTS
         )
@@ -186,22 +225,32 @@ def main():
         log.info(f"Found {len(image_paths):,} images")
 
     if not image_paths:
-        log.warn("No images found. Check --images-dir and that images have supported extensions.")
+        log.warn(
+            "No images found. Check --images-dir and that images have supported extensions."
+        )
         sys.exit(1)
 
     # ── Model ─────────────────────────────────────────────────────────────────
-    model = build_model(args.model, num_classes=num_classes,
-                        drop_path_rate=0.0, pretrained=False).to(device)
+    model = build_model(
+        args.model, num_classes=num_classes, drop_path_rate=0.0, pretrained=False
+    ).to(device)
     load_checkpoint(args.checkpoint, model, device=device)
     model.eval()
     log.info(f"Loaded checkpoint: {args.checkpoint}")
 
     # ── DataLoader ────────────────────────────────────────────────────────────
-    transform = (tta_transform(args.image_size) if args.tta
-                 else val_transforms(args.image_size))
+    transform = (
+        tta_transform(args.image_size) if args.tta else val_transforms(args.image_size)
+    )
     ds = ImageFolderDataset(image_paths, transform)
-    loader = DataLoader(ds, batch_size=args.batch_size, collate_fn=collate_fn,
-                        shuffle=False, num_workers=args.num_workers, pin_memory=True)
+    loader = DataLoader(
+        ds,
+        batch_size=args.batch_size,
+        collate_fn=collate_fn,
+        shuffle=False,
+        num_workers=args.num_workers,
+        pin_memory=True,
+    )
 
     # ── Inference ─────────────────────────────────────────────────────────────
     probs, returned_paths = run_inference(
@@ -209,8 +258,12 @@ def main():
     )
 
     # ── Report ────────────────────────────────────────────────────────────────
-    report: dict = {"checkpoint": str(args.checkpoint), "images_dir": str(images_dir),
-                    "num_images": len(image_paths), "tta": args.tta}
+    report: dict = {
+        "checkpoint": str(args.checkpoint),
+        "images_dir": str(images_dir),
+        "num_images": len(image_paths),
+        "tta": args.tta,
+    }
 
     if labeled:
         label_tensor = torch.tensor(labels, dtype=torch.long)
@@ -276,7 +329,9 @@ def main():
         report["predictions"] = predictions
 
     # ── Save JSON ─────────────────────────────────────────────────────────────
-    out_file = Path(args.out_file) if args.out_file else images_dir / "test_results.json"
+    out_file = (
+        Path(args.out_file) if args.out_file else images_dir / "test_results.json"
+    )
     out_file.parent.mkdir(parents=True, exist_ok=True)
     with open(out_file, "w") as f:
         json.dump(report, f, indent=2)
