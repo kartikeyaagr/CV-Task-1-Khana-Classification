@@ -78,6 +78,67 @@ Then generate the stratified split manifest (80/10/10 train/val/test):
 python prepare_splits.py
 ```
 
+## Testing on New Images
+
+`test_images.py` runs the trained model on any folder of images and reports accuracy or top-k predictions.
+
+**Labeled mode** — organise images into class subdirectories (names must match the 80 training classes):
+
+```
+my_test_images/
+├── biryani/
+│   └── photo1.jpg
+├── chapati/
+│   └── photo2.jpg
+└── ...
+```
+
+```bash
+# Basic evaluation
+uv run python test_images.py \
+    --images-dir my_test_images/ \
+    --checkpoint models/384/best_ema_hires.pt \
+    --image-size 384
+
+# With 5-crop TTA (slightly higher accuracy)
+uv run python test_images.py \
+    --images-dir my_test_images/ \
+    --checkpoint models/384/best_ema_hires.pt \
+    --image-size 384 --tta
+```
+
+Outputs: top-1 / top-5 accuracy, per-class breakdown, `per_class_accuracy.csv`, and `test_results.json` inside `my_test_images/`.
+
+**Unlabeled mode** — flat folder with no subdirectories; prints top-5 predictions per image:
+
+```
+my_test_images/
+├── unknown1.jpg
+└── unknown2.jpg
+```
+
+```bash
+uv run python test_images.py \
+    --images-dir my_test_images/ \
+    --checkpoint models/384/best_ema_hires.pt \
+    --image-size 384 --top-k 5
+```
+
+**All options:**
+
+| Flag | Default | Description |
+|---|---|---|
+| `--images-dir` | *(required)* | Folder of test images |
+| `--checkpoint` | *(required)* | Path to `.pt` model checkpoint |
+| `--manifest` | `splits/manifest.json` | Class list source |
+| `--model` | `convnext_small.fb_in22k_ft_in1k` | Model architecture |
+| `--image-size` | `384` | Inference resolution (match training resolution) |
+| `--batch-size` | `32` | Batch size |
+| `--amp` | `bfloat16` | AMP dtype (`bfloat16`, `float16`, `none`) |
+| `--tta` | off | Enable 5-crop test-time augmentation |
+| `--top-k` | `5` | Top-k predictions shown in unlabeled mode |
+| `--out-file` | auto | Override output JSON path |
+
 ## Training
 
 ### Quick start — full pipeline
